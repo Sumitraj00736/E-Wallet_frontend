@@ -24,6 +24,7 @@ export default function Wallet() {
   const [generatedQr, setGeneratedQr] = useState(null);
   const [scanError, setScanError] = useState(null);
 
+  // Fetch all users (once logged in)
   useEffect(() => {
     if (user) fetchUsers();
   }, [user]);
@@ -39,7 +40,14 @@ export default function Wallet() {
     scanner.render(
       (data) => {
         try {
-          const parsed = JSON.parse(data);
+          const parsed = JSON.parse(data); // data must be { userId, amount }
+
+          if (!parsed.userId || !parsed.amount) {
+            setScanError("Invalid QR Code: missing required fields");
+            return;
+          }
+
+          setScanError(null);
           setScannedQrData(parsed);
         } catch (e) {
           setScanError("Invalid QR Code format");
@@ -55,7 +63,7 @@ export default function Wallet() {
 
   // ---------------- Wallet Actions -------------------
   const handleTopup = async () => {
-    if (!topupAmount) return;
+    if (!topupAmount) return alert("Enter amount");
     try {
       await topUpWallet(Number(topupAmount));
       setTopupAmount("");
@@ -66,7 +74,8 @@ export default function Wallet() {
   };
 
   const handleTransfer = async () => {
-    if (!receiverId || !transferAmount) return;
+    if (!receiverId || !transferAmount)
+      return alert("Select user & enter amount");
     try {
       await transferFunds(receiverId, Number(transferAmount));
       setTransferAmount("");
@@ -78,10 +87,15 @@ export default function Wallet() {
   };
 
   const handleGenerateQR = async () => {
-    if (!qrAmount) return;
+    if (!qrAmount) return alert("Enter amount");
+
     try {
-      const res = await generateQR(Number(qrAmount));
-      setGeneratedQr(res);
+      const res = await generateQR(Number(qrAmount)); // backend returns {qrCodeData: JSON.stringify({...})}
+
+      // Must encode JSON before placing inside IMG URL
+      const encoded = encodeURIComponent(res.qrCodeData);
+
+      setGeneratedQr(encoded);
       setQrAmount("");
     } catch (err) {
       alert("QR generation failed: " + err.message);
@@ -89,7 +103,8 @@ export default function Wallet() {
   };
 
   const handlePayQr = async () => {
-    if (!qrData) return;
+    if (!qrData) return alert("Invalid QR");
+
     try {
       await transferFunds(qrData.userId, qrData.amount);
       setScannedQrData(null);
@@ -263,7 +278,7 @@ export default function Wallet() {
         {generatedQr && (
           <div style={{ textAlign: "center", marginTop: "10px" }}>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?data=${generatedQr.qrCodeData}&size=150x150`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?data=${generatedQr}&size=150x150`}
               alt="QR Code"
             />
           </div>
