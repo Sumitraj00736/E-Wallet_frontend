@@ -129,6 +129,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.post("/api/qr/generate", { amount }, { headers: getAuthHeader() });
       setQrCode(res.data);
+      console.log("QR",res.data)
       return res.data;
     } catch (err) {
       throw err.response?.data || err;
