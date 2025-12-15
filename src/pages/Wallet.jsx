@@ -3,23 +3,23 @@ import React, { useState, useEffect } from "react";
 import { useAuthContext } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import TransferModule from "../components/FundTransfer/TransferModule.jsx";
+import BalanceModule from "../components/BalanceModule/BalanceModule.jsx";
+import GenerateQRModule from "../components/GenerateQrModule/GenerateQRModule.jsx";
+import QrScannerModule from "../components/QrScannerModule/QrScannerModule.jsx";
+
 
 export default function Wallet() {
   const {
-    walletBalance,
     user,
-    users,
     fetchUsers,
     topUpWallet,
-    transferFunds,
     qrData,
     generateQR,
     setScannedQrData,
   } = useAuthContext();
 
   const [topupAmount, setTopupAmount] = useState("");
-  const [transferAmount, setTransferAmount] = useState("");
-  const [receiverId, setReceiverId] = useState("");
   const [qrAmount, setQrAmount] = useState("");
   const [generatedQr, setGeneratedQr] = useState(null);
   const [scanError, setScanError] = useState(null);
@@ -73,28 +73,12 @@ export default function Wallet() {
     }
   };
 
-  const handleTransfer = async () => {
-    if (!receiverId || !transferAmount)
-      return alert("Select user & enter amount");
-    try {
-      await transferFunds(receiverId, Number(transferAmount));
-      setTransferAmount("");
-      setReceiverId("");
-      alert("Transfer successful!");
-    } catch (err) {
-      alert("Transfer failed: " + err.message);
-    }
-  };
-
   const handleGenerateQR = async () => {
     if (!qrAmount) return alert("Enter amount");
 
     try {
-      const res = await generateQR(Number(qrAmount)); // backend returns {qrCodeData: JSON.stringify({...})}
-
-      // Must encode JSON before placing inside IMG URL
+      const res = await generateQR(Number(qrAmount)); 
       const encoded = encodeURIComponent(res.qrCodeData);
-
       setGeneratedQr(encoded);
       setQrAmount("");
     } catch (err) {
@@ -171,8 +155,10 @@ export default function Wallet() {
   return (
     <div style={containerStyle}>
 
+            {/* ---------------- Balance ---------------- */}
+      <BalanceModule />
       {/* ---------------- QR Scanner ---------------- */}
-      <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      {/* <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <div style={titleStyle}>Scan QR Code</div>
         <div id="qr-reader" style={{ width: "100%", borderRadius: "10px" }}></div>
 
@@ -188,16 +174,10 @@ export default function Wallet() {
             Pay ₹{qrData.amount}
           </motion.button>
         )}
-      </motion.div>
+      </motion.div> */}
+      <QrScannerModule />
 
-      {/* ---------------- Balance ---------------- */}
-      <motion.h2
-        style={{ textAlign: "center", fontSize: "28px" }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        Wallet Balance: ₹ {walletBalance.toFixed(2)}
-      </motion.h2>
+
 
       {/* ---------------- Top Up ---------------- */}
       <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -218,72 +198,10 @@ export default function Wallet() {
           Top Up
         </motion.button>
       </motion.div>
-
-      {/* ---------------- Transfer ---------------- */}
-      <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div style={titleStyle}>Transfer Funds</div>
-        <select
-          style={inputStyle}
-          value={receiverId}
-          onChange={(e) => setReceiverId(e.target.value)}
-        >
-          <option value="">Select Receiver</option>
-          {users
-            .filter((u) => u.id !== user.id)
-            .map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name} ({u.email})
-              </option>
-            ))}
-        </select>
-
-        <input
-          style={inputStyle}
-          type="number"
-          placeholder="Enter amount"
-          value={transferAmount}
-          onChange={(e) => setTransferAmount(e.target.value)}
-        />
-
-        <motion.button
-          style={buttonStyle}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleTransfer}
-        >
-          Send
-        </motion.button>
-      </motion.div>
-
+      {/* ---------------- Transfer Module ---------------- */}
+      <TransferModule />
       {/* ---------------- Generate QR ---------------- */}
-      <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div style={titleStyle}>Generate QR Code</div>
-        <input
-          style={inputStyle}
-          type="number"
-          placeholder="Enter amount"
-          value={qrAmount}
-          onChange={(e) => setQrAmount(e.target.value)}
-        />
-
-        <motion.button
-          style={buttonStyle}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleGenerateQR}
-        >
-          Generate QR
-        </motion.button>
-
-        {generatedQr && (
-          <div style={{ textAlign: "center", marginTop: "10px" }}>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?data=${generatedQr}&size=150x150`}
-              alt="QR Code"
-            />
-          </div>
-        )}
-      </motion.div>
+      <GenerateQRModule />
     </div>
   );
 }

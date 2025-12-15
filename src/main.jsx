@@ -1,12 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import "./index.css";
 import { AuthProvider } from "./context/AuthContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <div style={{ backgroundColor: "#000", minHeight: "100vh", color: "#f5f5f5" }}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </div>
   </React.StrictMode>
 );

@@ -84,6 +84,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.get("/api/auth/users", { headers: getAuthHeader() });
       setUsers(res.data.filter(u => u.id !== user?.id));
+      console.log("All users:", res.data);  
+      // cosnole.log("Filtered users:", users);  
       return res.data;
     } catch (err) {
       console.error("Fetch users error:", err);
@@ -108,12 +110,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // --- WALLET TRANSFER ---
-  const transferFunds = async (receiverId, amount) => {
+  const transferFunds = async (receiverId, amount, password) => {
     if (!token) throw new Error("No token available for authorization");
     try {
       const res = await api.post(
         "/api/wallet/transfer",
-        { receiverId, amount },
+        { receiverId, amount, password },
         { headers: getAuthHeader() }
       );
       setWalletBalance(prev => prev - amount);
@@ -137,21 +139,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   // --- PAY USING SCANNED QR ---
-  const payWithQr = async (qrData) => {
-    if (!token) throw new Error("No token available for authorization");
-    try {
-      const res = await api.post(
-        "/api/wallet/transfer",
-        { receiverId: qrData.userId, amount: qrData.amount },
-        { headers: getAuthHeader() }
-      );
-      setWalletBalance(prev => prev - qrData.amount);
-      setScannedQrData(qrData);
-      return res.data;
-    } catch (err) {
-      throw err.response?.data || err;
-    }
-  };
+  const payWithQr = async (qrId) => {
+  if (!token) throw new Error("No token available for authorization");
+  if (!user?.id) throw new Error("User not authenticated");
+
+  try {
+    const res = await api.post(
+      "/api/qr/pay",
+      {
+        qrId: qrId,
+        payerId: user.id
+      },
+      { headers: getAuthHeader() }
+    );
+
+    // DO NOT manually deduct balance
+    // Instead refetch wallet from backend
+    await fetchProfile();
+
+    setScannedQrData(null);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || err;
+  }
+};
+
 
   return (
     <AuthContext.Provider
