@@ -1,98 +1,121 @@
 // src/components/QrScannerModule/QrScannerModule.jsx
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { QrReader } from "@blackbox-vision/react-qr-reader";
 import { useAuthContext } from "../../context/AuthContext";
 
 const QrScannerModule = () => {
-  const { qrData, setScannedQrData, payWithQr } = useAuthContext();
+  const { payWithQr } = useAuthContext();
+  const [qrId, setQrId] = useState(null);
   const [scanError, setScanError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      "qr-reader",
-      { fps: 10, qrbox: 250 },
-      false
-    );
-
-    scanner.render(
-      (data) => {
-        try {
-          const parsed = JSON.parse(data); // expects { userId, amount }
-
-          if (!parsed.userId || !parsed.amount) {
-            setScanError("Invalid QR Code: missing required fields");
-            return;
-          }
-
-          setScanError(null);
-          setScannedQrData(parsed);
-        } catch (e) {
-          setScanError("Invalid QR Code format");
-        }
-      },
-      (err) => setScanError("Camera error: " + err)
-    );
-
-    return () => scanner.clear();
-  }, [setScannedQrData]);
-
-  const handlePayQr = async () => {
-    if (!qrData) return alert("Invalid QR");
-
-    try {
-      await payWithQr(qrData.id);
-      alert("Payment successful!");
-    } catch (err) {
-      alert("Payment failed: " + (err.message || err));
+  const handleScan = (result) => {
+    if (result) {
+      console.log("QR scanned:", result); // log scanned data
+      setQrId(result);
+      setScanError(null);
+      setShowModal(true); // show modal to pay
     }
   };
 
-  const cardStyle = {
-    background: "#1a1a1a",
-    borderRadius: "15px",
-    padding: "20px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    border: "1px solid #2e2e2e",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.6)",
+  const handleError = (err) => {
+    console.error("QR scanner error:", err);
+    setScanError(err?.message || "Unknown scanning error");
   };
 
-  const buttonStyle = {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#d4a017",
-    color: "#000",
-    fontWeight: "bold",
-    cursor: "pointer",
-    border: "none",
-    fontSize: "15px",
-  };
-
-  const titleStyle = {
-    fontSize: "20px",
-    fontWeight: "bold",
-    marginBottom: "10px",
+  const handlePay = async () => {
+    if (!qrId) return alert("No QR scanned");
+    try {
+      console.log("Paying QR ID:", qrId);
+      await payWithQr(qrId);
+      alert("Payment successful!");
+      setQrId(null);
+      setShowModal(false);
+    } catch (err) {
+      console.error("Payment failed:", err);
+      alert("Payment failed: " + (err.message || JSON.stringify(err)));
+    }
   };
 
   return (
-    <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div style={titleStyle}>Scan QR Code</div>
-      <div id="qr-reader" style={{ width: "100%", borderRadius: "10px" }}></div>
+    <motion.div
+      style={{
+        background: "#1a1a1a",
+        borderRadius: "15px",
+        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "15px",
+        border: "1px solid #2e2e2e",
+        boxShadow: "0 8px 20px rgba(0,0,0,0.6)",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <div style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>
+        Scan QR Code
+      </div>
+
+      <QrReader
+        onResult={(result, error) => {
+          if (!!result) handleScan(result?.text);
+          if (!!error) handleError(error);
+        }}
+        constraints={{ facingMode: "environment" }}
+        containerStyle={{ width: "100%" }}
+      />
 
       {scanError && <p style={{ color: "red" }}>{scanError}</p>}
 
-      {qrData && (
-        <motion.button
-          style={buttonStyle}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handlePayQr}
+      {showModal && (
+        <motion.div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
         >
-          Pay ₹{qrData.amount}
-        </motion.button>
+          <motion.div
+            style={{
+              background: "#1a1a1a",
+              padding: "30px",
+              borderRadius: "15px",
+              textAlign: "center",
+              minWidth: "300px",
+            }}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+          >
+            <p style={{ fontSize: "18px", marginBottom: "20px" }}>
+              QR Scanned: {qrId}
+            </p>
+            <button
+              onClick={handlePay}
+              style={{
+                padding: "12px 20px",
+                borderRadius: "8px",
+                backgroundColor: "#d4a017",
+                color: "#000",
+                fontWeight: "bold",
+                cursor: "pointer",
+                border: "none",
+                fontSize: "16px",
+              }}
+            >
+              Pay
+            </button>
+          </motion.div>
+        </motion.div>
       )}
     </motion.div>
   );
