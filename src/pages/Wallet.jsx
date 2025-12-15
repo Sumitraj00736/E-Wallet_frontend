@@ -8,6 +8,7 @@ import BalanceModule from "../components/BalanceModule/BalanceModule.jsx";
 import QrScannerModule from "../components/QrScannerModule/QrScannerModule.jsx";
 import GenerateQRModule from "../components/GenerateQrModule/GenerateQRModule.jsx";
 import Header from "../components/Generalheader/Header.jsx";
+import TopUpCard from "../components/Topup/TopUpCard.jsx";
 
 export default function Wallet() {
   const {
@@ -162,24 +163,7 @@ export default function Wallet() {
       {/* ---------------- QR Scanner ---------------- */}
       <QrScannerModule/>
       {/* ---------------- Top Up ---------------- */}
-      <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div style={titleStyle}>Top-Up Wallet</div>
-        <input
-          style={inputStyle}
-          type="number"
-          placeholder="Enter amount"
-          value={topupAmount}
-          onChange={(e) => setTopupAmount(e.target.value)}
-        />
-        <motion.button
-          style={buttonStyle}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleTopup}
-        >
-          Top Up
-        </motion.button>
-      </motion.div>
+      <TopUpCard />
       {/* ---------------- Transfer Module ---------------- */}
       <TransferModule />
       {/* ---------------- Generate QR ---------------- */}

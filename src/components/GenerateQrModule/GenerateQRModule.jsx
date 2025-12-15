@@ -45,7 +45,7 @@ export default function GenerateQRModule() {
   /* ---------- styles ---------- */
 const cardStyle = {
   background: "#1a1a1a",
-  width: "100%",
+  width: "92%",
   borderRadius: "15px",
   padding: "20px",
   display: "flex",
