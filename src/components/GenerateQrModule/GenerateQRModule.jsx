@@ -43,18 +43,21 @@ export default function GenerateQRModule() {
   };
 
   /* ---------- styles ---------- */
-  const cardStyle = {
-    background: "#1a1a1a",
-    borderRadius: "15px",
-    padding: "20px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    border: "1px solid #2e2e2e",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.6)",
+const cardStyle = {
+  background: "#1a1a1a",
+  width: "100%",
+  borderRadius: "15px",
+  padding: "20px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "15px",
+  border: "1px solid #2e2e2e",
+  boxShadow: "0 0 20px 2px #d4a017",
     maxWidth: "400px",
-    margin: "0 auto"
-  };
+  margin: "0 auto",
+  transition: "all 0.3s ease"
+};
+
 
   const inputStyle = {
     width: "100%",
@@ -208,7 +211,7 @@ export default function GenerateQRModule() {
               fontSize: "14px",
               padding: "10px"
             }}>
-              📸 Show this QR code to receive payment
+              Show this QR code to receive payment
             </div>
 
             {/* Generate Another Button */}

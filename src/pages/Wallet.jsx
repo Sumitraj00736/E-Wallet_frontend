@@ -7,6 +7,7 @@ import TransferModule from "../components/FundTransfer/TransferModule.jsx";
 import BalanceModule from "../components/BalanceModule/BalanceModule.jsx";
 import QrScannerModule from "../components/QrScannerModule/QrScannerModule.jsx";
 import GenerateQRModule from "../components/GenerateQrModule/GenerateQRModule.jsx";
+import Header from "../components/Generalheader/Header.jsx";
 
 export default function Wallet() {
   const {
@@ -154,6 +155,7 @@ export default function Wallet() {
 
   return (
     <div style={containerStyle}>
+      <Header/>
 
       {/* ---------------- Balance ---------------- */}
       <BalanceModule />

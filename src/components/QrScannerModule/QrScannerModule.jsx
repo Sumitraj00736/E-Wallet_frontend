@@ -34,8 +34,8 @@ const QrScannerModule = () => {
     try {
       const scanner = new Html5QrcodeScanner(
         "qr-reader", // Make sure this matches the div id
-        { 
-          fps: 10, 
+        {
+          fps: 10,
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
           // Try different facing modes if back camera doesn't work
@@ -50,16 +50,16 @@ const QrScannerModule = () => {
         (decodedText, decodedResult) => {
           console.log("✅ QR Code scanned successfully:", decodedText);
           console.log("Full result:", decodedResult);
-          
+
           if (!decodedText) {
             setScanError("Empty QR code");
             console.warn("Scanned QR is empty");
             return;
           }
-          
+
           // Stop scanner immediately after successful scan
           cleanupScanner();
-          
+
           setScanError(null);
           setScannedQrId(decodedText);
           setShowPopup(true);
@@ -67,8 +67,10 @@ const QrScannerModule = () => {
         },
         (errorMessage) => {
           // Only show actual errors, not "scan not found" messages
-          if (!errorMessage.includes("NotFoundException") && 
-              !errorMessage.includes("No MultiFormat Readers")) {
+          if (
+            !errorMessage.includes("NotFoundException") &&
+            !errorMessage.includes("No MultiFormat Readers")
+          ) {
             console.error("Scanner error:", errorMessage);
           }
         }
@@ -76,7 +78,6 @@ const QrScannerModule = () => {
 
       setIsScanning(true);
       console.log("Scanner initialized successfully");
-
     } catch (error) {
       console.error("Failed to initialize scanner:", error);
       setScanError("Failed to initialize scanner: " + error.message);
@@ -137,56 +138,63 @@ const QrScannerModule = () => {
       <motion.div
         style={{
           background: "#1a1a1a",
+          width: "90%",
           borderRadius: "15px",
           padding: "20px",
           display: "flex",
           flexDirection: "column",
           gap: "15px",
           border: "1px solid #2e2e2e",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.6)",
+          boxShadow: "0 0 20px 2px #d4a017",
           maxWidth: "600px",
-          margin: "0 auto"
+          margin: "0 auto",
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div style={{ 
-          fontSize: "20px", 
-          fontWeight: "bold", 
-          marginBottom: "10px",
-          textAlign: "center"
-        }}>
+        <div
+          style={{
+            fontSize: "20px",
+            fontWeight: "bold",
+            marginBottom: "10px",
+            textAlign: "center",
+          }}
+        >
           Scan QR Code to Pay
         </div>
 
         {/* Scanner Container */}
         <div
           id="qr-reader"
-          style={{ 
-            width: "100%", 
+          style={{
+            width: "100%",
             borderRadius: "10px",
-            minHeight: "300px"
+            minHeight: "300px",
           }}
         ></div>
 
         {/* Status Messages */}
         {isScanning && !scanError && (
-          <p style={{ 
-            color: "#d4a017", 
-            textAlign: "center",
-            fontSize: "14px"
-          }}>
+          <p
+            style={{
+              color: "#d4a017",
+              textAlign: "center",
+              fontSize: "14px",
+            }}
+          >
             📸 Point your camera at a QR code
           </p>
         )}
 
         {scanError && (
-          <div style={{
-            padding: "15px",
-            background: "rgba(255,68,68,0.1)",
-            border: "1px solid #ff4444",
-            borderRadius: "8px"
-          }}>
+          <div
+            style={{
+              padding: "15px",
+              background: "rgba(255,68,68,0.1)",
+              border: "1px solid #ff4444",
+              borderRadius: "8px",
+            }}
+          >
             <p style={{ color: "#ff4444", margin: 0 }}>{scanError}</p>
             <button
               onClick={() => window.location.reload()}
@@ -198,7 +206,7 @@ const QrScannerModule = () => {
                 border: "none",
                 borderRadius: "5px",
                 cursor: "pointer",
-                fontWeight: "bold"
+                fontWeight: "bold",
               }}
             >
               Retry
@@ -207,18 +215,22 @@ const QrScannerModule = () => {
         )}
 
         {/* Debug Info */}
-        <details style={{ 
-          fontSize: "12px", 
-          color: "#888",
-          cursor: "pointer"
-        }}>
+        <details
+          style={{
+            fontSize: "12px",
+            color: "#888",
+            cursor: "pointer",
+          }}
+        >
           <summary>Troubleshooting</summary>
           <ul style={{ marginTop: "10px", paddingLeft: "20px" }}>
             <li>Make sure camera permissions are granted</li>
             <li>Ensure QR code is clear and well-lit</li>
             <li>Hold camera steady for 2-3 seconds</li>
             <li>Try different distances from QR code</li>
-            <li>Make sure the QR code is not too large or too small in frame</li>
+            <li>
+              Make sure the QR code is not too large or too small in frame
+            </li>
           </ul>
         </details>
       </motion.div>
@@ -244,7 +256,7 @@ const QrScannerModule = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 zIndex: 1000,
-                padding: "20px"
+                padding: "20px",
               }}
               onClick={handleClosePopup}
             >
@@ -255,14 +267,15 @@ const QrScannerModule = () => {
                 exit={{ scale: 0.8, opacity: 0, y: 50 }}
                 transition={{ type: "spring", damping: 25 }}
                 style={{
-                  background: "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)",
+                  background:
+                    "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)",
                   borderRadius: "20px",
                   padding: "30px",
                   maxWidth: "400px",
                   width: "100%",
                   border: "2px solid #d4a017",
                   boxShadow: "0 20px 60px rgba(212,160,23,0.3)",
-                  position: "relative"
+                  position: "relative",
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -284,7 +297,7 @@ const QrScannerModule = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: "50%",
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = "#333";
@@ -306,75 +319,88 @@ const QrScannerModule = () => {
                   style={{
                     width: "80px",
                     height: "80px",
-                    background: "linear-gradient(135deg, #d4a017 0%, #ffd700 100%)",
+                    background:
+                      "linear-gradient(135deg, #d4a017 0%, #ffd700 100%)",
                     borderRadius: "50%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: "0 auto 20px",
-                    fontSize: "40px"
+                    fontSize: "40px",
                   }}
                 >
                   ✓
                 </motion.div>
 
-                <h2 style={{
-                  color: "#fff",
-                  textAlign: "center",
-                  marginBottom: "10px",
-                  fontSize: "24px"
-                }}>
+                <h2
+                  style={{
+                    color: "#fff",
+                    textAlign: "center",
+                    marginBottom: "10px",
+                    fontSize: "24px",
+                  }}
+                >
                   QR Code Scanned
                 </h2>
 
-                <p style={{
-                  color: "#888",
-                  textAlign: "center",
-                  marginBottom: "25px",
-                  fontSize: "14px"
-                }}>
+                <p
+                  style={{
+                    color: "#888",
+                    textAlign: "center",
+                    marginBottom: "25px",
+                    fontSize: "14px",
+                  }}
+                >
                   Review the details and confirm payment
                 </p>
 
                 {/* QR Data Display */}
-                <div style={{
-                  background: "#0f0f0f",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  marginBottom: "25px",
-                  border: "1px solid #333"
-                }}>
-                  <div style={{
-                    color: "#888",
-                    fontSize: "12px",
-                    marginBottom: "5px",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px"
-                  }}>
+                <div
+                  style={{
+                    background: "#0f0f0f",
+                    padding: "15px",
+                    borderRadius: "12px",
+                    marginBottom: "25px",
+                    border: "1px solid #333",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#888",
+                      fontSize: "12px",
+                      marginBottom: "5px",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                    }}
+                  >
                     QR Code ID
                   </div>
-                  <div style={{
-                    color: "#d4a017",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    wordBreak: "break-all"
-                  }}>
+                  <div
+                    style={{
+                      color: "#d4a017",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      wordBreak: "break-all",
+                    }}
+                  >
                     {scannedQrId}
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div style={{
-                  display: "flex",
-                  gap: "10px",
-                  flexDirection: "column"
-                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    flexDirection: "column",
+                  }}
+                >
                   <motion.button
                     style={{
                       width: "100%",
                       padding: "15px",
                       borderRadius: "12px",
-                      background: isProcessing 
+                      background: isProcessing
                         ? "#888"
                         : "linear-gradient(135deg, #d4a017 0%, #ffd700 100%)",
                       color: "#000",
@@ -385,7 +411,7 @@ const QrScannerModule = () => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: "10px"
+                      gap: "10px",
                     }}
                     whileHover={!isProcessing ? { scale: 1.02 } : {}}
                     whileTap={!isProcessing ? { scale: 0.98 } : {}}
@@ -396,21 +422,23 @@ const QrScannerModule = () => {
                       <>
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
                           style={{
                             width: "20px",
                             height: "20px",
                             border: "3px solid #000",
                             borderTopColor: "transparent",
-                            borderRadius: "50%"
+                            borderRadius: "50%",
                           }}
                         />
                         Processing...
                       </>
                     ) : (
-                      <>
-                        💳 Confirm Payment
-                      </>
+                      <>💳 Confirm Payment</>
                     )}
                   </motion.button>
 
@@ -424,7 +452,7 @@ const QrScannerModule = () => {
                       fontWeight: "bold",
                       cursor: "pointer",
                       border: "1px solid #333",
-                      fontSize: "16px"
+                      fontSize: "16px",
                     }}
                     whileHover={{ scale: 1.02, borderColor: "#666" }}
                     whileTap={{ scale: 0.98 }}
