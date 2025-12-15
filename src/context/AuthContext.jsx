@@ -80,18 +80,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   // --- FETCH ALL USERS ---
-  const fetchUsers = async () => {
-    try {
-      const res = await api.get("/api/auth/users", { headers: getAuthHeader() });
-      setUsers(res.data.filter(u => u.id !== user?.id));
-      // console.log("All users:", res.data);  
-      // cosnole.log("Filtered users:", users);  
-      return res.data;
-    } catch (err) {
-      console.error("Fetch users error:", err);
-      throw err;
-    }
-  };
+const fetchUsers = async () => {
+  if (!token) throw new Error("No token available");
+  try {
+    const res = await api.get("/api/auth/users", { headers: getAuthHeader() });
+    const filteredUsers = res.data.filter(u => user ? u.id !== user.id : true);
+    setUsers(filteredUsers);
+    console.log("All users:", res.data);
+    console.log("Filtered users:", filteredUsers);
+    return filteredUsers;
+  } catch (err) {
+    console.error("Fetch users error:", err);
+    throw err;
+  }
+};
+
 
   // --- WALLET TOPUP ---
   const topUpWallet = async (amount) => {

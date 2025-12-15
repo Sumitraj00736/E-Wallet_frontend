@@ -1,10 +1,10 @@
 // src/components/FundTransfer/TransferModule.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TransferModule() {
-  const { users, user, transferFunds } = useAuthContext();
+  const { users, user, fetchUsers, transferFunds } = useAuthContext();
 
   const [receiverId, setReceiverId] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
@@ -12,10 +12,18 @@ export default function TransferModule() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [fetchingUsers, setFetchingUsers] = useState(false);
+
+  // ---------------- Fetch users on mount ----------------
+  useEffect(() => {
+    if (user && (!users || users.length === 0)) {
+      fetchUsers().catch((err) => console.error("Failed to fetch users:", err));
+    }
+  }, [user, users, fetchUsers]);
 
   const handleSendClick = () => {
     if (!receiverId || !transferAmount) {
-      alert("Select user & enter amount");
+      alert("Select receiver & enter amount");
       return;
     }
     setShowPasswordModal(true);
@@ -115,17 +123,20 @@ export default function TransferModule() {
     textAlign: "center",
   };
 
-  // ---------------- Dropdown Animation ----------------
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10 },
     visible: { opacity: 1, y: 0 },
   };
 
   return (
-    <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div
+      style={cardStyle}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
       <div style={titleStyle}>Transfer Funds</div>
 
-      {/* ---------------- Animated Dropdown ---------------- */}
+      {/* ---------------- Dropdown ---------------- */}
       <div style={{ position: "relative" }}>
         <motion.div
           style={{
@@ -140,12 +151,14 @@ export default function TransferModule() {
           whileHover={{ scale: 1.02 }}
         >
           {receiverId
-            ? users.find((u) => u.id === receiverId)?.name
+            ? users?.find((u) => u.id === receiverId)?.name
+            : fetchingUsers
+            ? "Loading users..."
             : "Select Receiver"}
         </motion.div>
 
         <AnimatePresence>
-          {dropdownOpen && (
+          {dropdownOpen && users && users.length > 0 && (
             <motion.div
               initial="hidden"
               animate="visible"
