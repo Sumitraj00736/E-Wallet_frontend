@@ -1,39 +1,61 @@
-// src/components/QrScannerModule/QrScannerModule.jsx
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { QrReader } from "@blackbox-vision/react-qr-reader";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import { useAuthContext } from "../../context/AuthContext";
 
 const QrScannerModule = () => {
   const { payWithQr } = useAuthContext();
-  const [qrId, setQrId] = useState(null);
+  const [scannedQrId, setScannedQrId] = useState(null);
   const [scanError, setScanError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const scannerRef = useRef(null);
 
-  const handleScan = (result) => {
-    if (result) {
-      console.log("QR scanned:", result); // log scanned data
-      setQrId(result);
-      setScanError(null);
-      setShowModal(true); // show modal to pay
-    }
-  };
+  useEffect(() => {
+    if (!scannerRef.current) return;
 
-  const handleError = (err) => {
-    console.error("QR scanner error:", err);
-    setScanError(err?.message || "Unknown scanning error");
-  };
+    const scanner = new Html5QrcodeScanner(
+      scannerRef.current.id,
+      { fps: 10, qrbox: 250 },
+      false
+    );
+
+    scanner.render(
+      (qrId) => {
+        console.log("QR scanned:", qrId);
+        if (!qrId) {
+          setScanError("Empty QR code");
+          console.warn("Scanned QR is empty");
+          return;
+        }
+        setScanError(null);
+        setScannedQrId(qrId);
+        console.log("Stored scanned QR ID:", qrId);
+      },
+      (err) => {
+        console.error("QR scanner camera/error callback:", err);
+        setScanError("Camera error: " + err);
+      }
+    );
+
+    return () => {
+      scanner
+        .clear()
+        .then(() => console.log("Scanner cleared"))
+        .catch((e) => console.error("Failed to clear scanner:", e));
+    };
+  }, []);
 
   const handlePay = async () => {
-    if (!qrId) return alert("No QR scanned");
+    if (!scannedQrId) return alert("No QR scanned");
+
+    console.log("Paying with QR ID:", scannedQrId);
+
     try {
-      console.log("Paying QR ID:", qrId);
-      await payWithQr(qrId);
+      const res = await payWithQr(scannedQrId);
+      console.log("Payment response:", res);
       alert("Payment successful!");
-      setQrId(null);
-      setShowModal(false);
+      setScannedQrId(null);
     } catch (err) {
-      console.error("Payment failed:", err);
+      console.error("Payment error:", err);
       alert("Payment failed: " + (err.message || JSON.stringify(err)));
     }
   };
@@ -57,65 +79,36 @@ const QrScannerModule = () => {
         Scan QR Code
       </div>
 
-      <QrReader
-        onResult={(result, error) => {
-          if (!!result) handleScan(result?.text);
-          if (!!error) handleError(error);
-        }}
-        constraints={{ facingMode: "environment" }}
-        containerStyle={{ width: "100%" }}
-      />
+      <div
+        ref={scannerRef}
+        id="qr-reader"
+        style={{ width: "100%", borderRadius: "10px" }}
+      ></div>
 
       {scanError && <p style={{ color: "red" }}>{scanError}</p>}
 
-      {showModal && (
-        <motion.div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 999,
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <motion.div
+      {scannedQrId && (
+        <div>
+          <p style={{ color: "#d4a017" }}>Scanned QR ID: {scannedQrId}</p>
+          <motion.button
             style={{
-              background: "#1a1a1a",
-              padding: "30px",
-              borderRadius: "15px",
-              textAlign: "center",
-              minWidth: "300px",
+              width: "100%",
+              padding: "12px",
+              borderRadius: "8px",
+              backgroundColor: "#d4a017",
+              color: "#000",
+              fontWeight: "bold",
+              cursor: "pointer",
+              border: "none",
+              fontSize: "15px",
             }}
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handlePay}
           >
-            <p style={{ fontSize: "18px", marginBottom: "20px" }}>
-              QR Scanned: {qrId}
-            </p>
-            <button
-              onClick={handlePay}
-              style={{
-                padding: "12px 20px",
-                borderRadius: "8px",
-                backgroundColor: "#d4a017",
-                color: "#000",
-                fontWeight: "bold",
-                cursor: "pointer",
-                border: "none",
-                fontSize: "16px",
-              }}
-            >
-              Pay
-            </button>
-          </motion.div>
-        </motion.div>
+            Pay
+          </motion.button>
+        </div>
       )}
     </motion.div>
   );
