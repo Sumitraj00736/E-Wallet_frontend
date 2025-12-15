@@ -11,7 +11,9 @@ import QrScannerModule from "../components/QrScannerModule/QrScannerModule.jsx";
 
 export default function Wallet() {
   const {
+    walletBalance,
     user,
+    users,
     fetchUsers,
     topUpWallet,
     qrData,
@@ -73,30 +75,6 @@ export default function Wallet() {
     }
   };
 
-  const handleGenerateQR = async () => {
-    if (!qrAmount) return alert("Enter amount");
-
-    try {
-      const res = await generateQR(Number(qrAmount)); 
-      const encoded = encodeURIComponent(res.qrCodeData);
-      setGeneratedQr(encoded);
-      setQrAmount("");
-    } catch (err) {
-      alert("QR generation failed: " + err.message);
-    }
-  };
-
-  const handlePayQr = async () => {
-    if (!qrData) return alert("Invalid QR");
-
-    try {
-      await transferFunds(qrData.userId, qrData.amount);
-      setScannedQrData(null);
-      alert("Payment successful!");
-    } catch (err) {
-      alert("Payment failed: " + err.message);
-    }
-  };
 
   // ---------------- Inline Styles -------------------
   const containerStyle = {
@@ -157,28 +135,8 @@ export default function Wallet() {
 
             {/* ---------------- Balance ---------------- */}
       <BalanceModule />
-      {/* ---------------- QR Scanner ---------------- */}
-      {/* <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div style={titleStyle}>Scan QR Code</div>
-        <div id="qr-reader" style={{ width: "100%", borderRadius: "10px" }}></div>
-
-        {scanError && <p style={{ color: "red" }}>{scanError}</p>}
-
-        {qrData && (
-          <motion.button
-            style={buttonStyle}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handlePayQr}
-          >
-            Pay ₹{qrData.amount}
-          </motion.button>
-        )}
-      </motion.div> */}
-      <QrScannerModule />
-
-
-
+       {/* /* ---------------- QR Scanner ---------------- */  }
+       <QrScannerModule/>
       {/* ---------------- Top Up ---------------- */}
       <motion.div style={cardStyle} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <div style={titleStyle}>Top-Up Wallet</div>
@@ -198,9 +156,10 @@ export default function Wallet() {
           Top Up
         </motion.button>
       </motion.div>
+
       {/* ---------------- Transfer Module ---------------- */}
       <TransferModule />
-      {/* ---------------- Generate QR ---------------- */}
+
       <GenerateQRModule />
     </div>
   );

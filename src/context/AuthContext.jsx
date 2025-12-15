@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.get("/api/auth/users", { headers: getAuthHeader() });
       setUsers(res.data.filter(u => u.id !== user?.id));
-      console.log("All users:", res.data);  
+      // console.log("All users:", res.data);  
       // cosnole.log("Filtered users:", users);  
       return res.data;
     } catch (err) {

@@ -1,6 +1,6 @@
 import axios from "axios";
-const baseURL = "https://e-wallet-springboot-backend-production.up.railway.app"; // your backend URL
-// const baseURL2 = "http://localhost:8080"; 
+const baseURL = "https://e-wallet-springboot-backend-production.up.railway.app"; 
+// const baseURL = "http://localhost:8080"; 
 
 
 export const api = axios.create({
