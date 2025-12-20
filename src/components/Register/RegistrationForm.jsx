@@ -1,5 +1,5 @@
 // src/pages/Register.jsx
-import { useState } from "react";
+import React,{ useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
