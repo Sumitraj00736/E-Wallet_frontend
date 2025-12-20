@@ -142,7 +142,7 @@ const fetchUsers = async () => {
   };
 
   // --- PAY USING SCANNED QR ---
-  const payWithQr = async (qrId) => {
+  const payWithQr = async (qrCodeData) => {
   if (!token) throw new Error("No token available for authorization");
   if (!user?.id) throw new Error("User not authenticated");
 
@@ -150,9 +150,9 @@ const fetchUsers = async () => {
     const res = await api.post(
       "/api/qr/pay",
       {
-        qrId: qrId,
-        payerId: user.id
-      },
+      qrCodeData: qrCodeData,
+      payerId: user.id
+    },
       { headers: getAuthHeader() }
     );
 
